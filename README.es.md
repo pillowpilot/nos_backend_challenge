@@ -1,7 +1,7 @@
 # Desafio NOS Backend
 
-[![en](https://img.shields.io/badge/lang-en-green.svg)](https://github.com/pillowpilot/nos_blackend_challenge/blob/main/README.md)
-[![es](https://img.shields.io/badge/lang-es-green.svg)](https://github.com/pillowpilot/nos_blackend_challenge/blob/main/README.es.md)
+[![en](https://img.shields.io/badge/lang-en-green.svg)](https://github.com/pillowpilot/nos_backend_challenge/blob/main/README.md)
+[![es](https://img.shields.io/badge/lang-es-green.svg)](https://github.com/pillowpilot/nos_backend_challenge/blob/main/README.es.md)
 
 ## Probar localmente
 

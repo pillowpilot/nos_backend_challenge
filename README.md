@@ -1,66 +1,111 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# NOS Backend Take-home Challenge
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![en](https://img.shields.io/badge/lang-en-green.svg)](https://github.com/pillowpilot/nos_blackend_challenge/blob/main/README.md)
+[![es](https://img.shields.io/badge/lang-es-green.svg)](https://github.com/pillowpilot/nos_blackend_challenge/blob/main/README.es.md)
 
-## About Laravel
+## Test locally
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+To test the project locally run:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```bash
+docker compose up --build web
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Docker Compose Setup
 
-## Learning Laravel
+The project setup consists on two services: `web` (the Laravel app with Apache2 as web server) and `db` (a MySQL db). The app is exposed on the port `8080` (`8080` is usually used for development purposes), so use [http://localhost:8080/api/boards](http://localhost:8080/api/boards). Notice the lack of final slash.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Migration should happend automatically on every run (just for demostration purposes).
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```yaml
+version: "3.2"
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+services:
+    web:
+        build: .
+        depends_on:
+            - db
+        ports:
+            - 8080:80
+        entrypoint: sh -c "sleep 3 && php /var/www/html/artisan migrate --force && apache2-foreground"
+    db:
+        image: mysql
+        ports:
+            - "3306:3306" # Expose ports for manual inspection
+        environment:
+            - MYSQL_ROOT_PASSWORD=laravel1
+```
 
-## Laravel Sponsors
+## Automatic Testing
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Run the API tests with `docker compose exec web bash` to enter into a terminal inside the container and run `php artisan test`.
 
-### Premium Partners
+## Manual Testing
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Some testing results using Postman:
 
-## Contributing
+### Board creation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Request
 
-## Code of Conduct
+Method: POST
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+URL: http://localhost:8080/api/boards
 
-## Security Vulnerabilities
+Body: `{
+    "title": "New board"
+}`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+#### Response
 
-## License
+Status: 201
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Body: `{
+    "stage": 1,
+    "title": "New board",
+    "id": 1
+    }`
+
+### Successful Board Update
+
+#### Request
+
+Method: PUT
+
+URL: http://localhost:8080/api/boards/1
+
+Body: `{
+    "stage": "2"
+}`
+
+#### Response
+
+Status: 200
+
+Body: `{
+ "id":1,
+ "title":"New board",
+ "stage":"2"
+ }`
+
+### Invalid Board Update
+
+#### Request
+
+Method: PUT
+
+URL: http://localhost:8080/api/boards/1
+
+Body: `{
+    "stage": "23"
+}`
+
+#### Response
+
+Status: 400
+
+Body: `{
+    "stage": [
+        "The selected stage is invalid."
+    ]
+}`

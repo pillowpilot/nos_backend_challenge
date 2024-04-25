@@ -8,6 +8,12 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
+/**
+ * Board controller
+ * 
+ * Implements store and update methods.
+ * Uses Route Model Binding for automatic model injection.
+ */
 class BoardController extends Controller
 {
     /**
@@ -19,15 +25,22 @@ class BoardController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * 
+     * If success, returns 200 with new object as body.
+     * If fails, returns errors.
+     * 
+     * Requires the field 'title', ignores everything else.
      */
     public function store(Request $request)
     {
-        $rules = ['title' => 'required|max:100'];
+        $rules = [
+            'title' => 'required|max:100'
+        ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails())
             return response()->json($validator->messages());
 
-        $board = Board::create($request->all());
+        $board = Board::create(['title' => $request->json('title')]);
         return response()->json($board)->setStatusCode(Response::HTTP_CREATED);
     }
 
@@ -40,6 +53,14 @@ class BoardController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * 
+     * If success, returns 200 with new updated board.
+     * If model is not found, return 404. As per Route Model Binding.
+     * If fails, return 400 with error messages.
+     * 
+     * Requires the field 'stage', ignores everything else.
+     * 'stage' must be '1', '2', or '3'. Error 400, otherwise.
+     * 
      */
     public function update(Request $request, Board $board)
     {

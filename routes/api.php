@@ -19,5 +19,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+/**
+ * Board related endpoints
+ */
 Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
 Route::put('/boards/{board}', [BoardController::class, 'update'])->name('boards.update');

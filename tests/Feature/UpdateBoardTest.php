@@ -16,6 +16,8 @@ class UpdateBoardTest extends TestCase
      */
     public function test_response_status_400_if_invalid_stage(): void
     {
+        Board::factory(10)->create();
+
         $some_invalid_stages = ['-1', '0', '4', '5', 'string', '1.2'];
         foreach ($some_invalid_stages as $stage) {
             $data = ['stage' => $stage];
@@ -37,7 +39,8 @@ class UpdateBoardTest extends TestCase
             $response = $this->putJson($url, $data);
 
             $response->assertStatus(200);
-            $response->assertJsonStructure(["id", "title", "stage" => $stage]);
+            $response->assertJsonFragment(["stage" => $stage]);
+            $response->assertJsonStructure(["id", "title", "stage"]);
         }
     }
 }
